@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# localfiles
+research-data/
+
+# Environment variables
+.env
+.env.local
+
+# Data files
+*.csv
+*.json
+*.pkl
+*.pickle
+
+# Vector databases
+embeddings/
+*.db
+*.sqlite3
+
+# Generated outputs
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.html
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# API keys and secrets
+secrets/
+keys/
