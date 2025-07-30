@@ -6,7 +6,7 @@ Jupyter notebooks demonstrating RAG evaluation and test generation.
 
 - **`raga_eval.ipynb`** - RAGAS evaluation workflow and metrics
 - **`raga_testset_gen_eval.ipynb`** - Automated test generation using RAGAS TestsetGenerator
-- **`k_fold_cross_validation.ipynb`** - Cross-validation examples
+- **`k_fold_cross_validation.ipynb`** - K_FOLD Cross-validation examples
 - **`snips_intent_slot_classifier_qa.ipynb`** - Intent and slot classification evaluation
 
 ## Data
