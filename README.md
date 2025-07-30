@@ -8,7 +8,6 @@ A framework for building and evaluating Retrieval-Augmented Generation (RAG) sys
 ├── attention-rag-eval/          # Complete RAG pipeline
 ├── notebooks-demo/              # Jupyter notebooks
 ├── testing-framework/           # Testing suite
-├── research-data/               # Research materials
 └── README.md
 ```
 
@@ -71,12 +70,3 @@ jupyter notebook
 - Interactive examples of test generation
 - RAGAS evaluation workflows
 - Practical demonstrations
-
-## Technologies
-
-- RAGAS for evaluation
-- LangChain for RAG implementation
-- ChromaDB for vector storage
-- OpenAI/DeepSeek APIs (with fallback)
-- PyTest for testing
-- Jupyter for notebooks
