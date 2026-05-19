@@ -645,7 +645,428 @@ Use `conftest.py` for shared fixtures, hooks, and test configuration. Tests can 
 - PR CI: deterministic tests, schema checks, permission checks, unit tests, stable Playwright smoke tests.
 - Nightly or manual: live LLM tests, RAGAS evals, LangSmith trace checks, long regression, performance tests.
 
-## 5. TypeScript And JavaScript For Playwright
+## 5. API Testing Revision
+
+### What Is An API?
+
+API means Application Programming Interface. It allows two software systems to communicate with each other.
+
+Simple example:
+
+```text
+Frontend UI -> calls API -> backend returns data -> UI displays data
+```
+
+Interview line:
+
+```text
+An API is a contract between client and server. The client sends a request, and the server returns a response with data, status code, headers, and sometimes error details.
+```
+
+### What Is REST API?
+
+REST API is an API style that uses HTTP methods like `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` to work with resources.
+
+Example resource:
+
+```text
+/users
+/users/101
+/orders/5001
+```
+
+Interview line:
+
+```text
+REST API exposes resources through URLs and uses standard HTTP methods to perform operations like read, create, update, and delete.
+```
+
+### Difference Between API Testing And UI Testing
+
+API testing validates backend/business logic directly.
+
+UI testing validates user-facing behavior through the browser.
+
+```text
+API testing:
+    faster, stable, validates service/business logic
+
+UI testing:
+    validates user journey, layout, browser behavior, end-to-end flow
+```
+
+Strong answer:
+
+```text
+I do not test everything through UI. If the business logic can be validated through API, I prefer API because it is faster and less flaky. I use UI tests for critical user journeys and visual/browser behavior.
+```
+
+### What Are HTTP Methods?
+
+HTTP methods define what action the client wants to perform on a resource.
+
+```text
+GET     -> read/fetch data
+POST    -> create new data
+PUT     -> replace full resource
+PATCH   -> partially update resource
+DELETE  -> delete resource
+```
+
+### GET
+
+Used to fetch data.
+
+```text
+GET /users/101
+```
+
+Expected:
+
+```text
+200 OK if user exists
+404 Not Found if user does not exist
+```
+
+### POST
+
+Used to create new data.
+
+```text
+POST /users
+Body: {"name": "Lokender", "role": "QA"}
+```
+
+Expected:
+
+```text
+201 Created if user is created
+400 Bad Request if payload is invalid
+409 Conflict if duplicate user already exists
+```
+
+### PUT
+
+Used to replace or update the full resource.
+
+Existing user:
+
+```json
+{
+  "id": 101,
+  "name": "Lokender",
+  "role": "QA",
+  "city": "Noida"
+}
+```
+
+PUT request:
+
+```text
+PUT /users/101
+```
+
+```json
+{
+  "name": "Lokender Singh",
+  "role": "Senior QA",
+  "city": "Gurgaon"
+}
+```
+
+Meaning: replace the full user data with this new data.
+
+### PATCH
+
+Used to partially update a resource.
+
+```text
+PATCH /users/101
+```
+
+```json
+{
+  "city": "Gurgaon"
+}
+```
+
+Meaning: only update city, keep other fields unchanged.
+
+### DELETE
+
+Used to delete a resource.
+
+```text
+DELETE /users/101
+```
+
+Expected:
+
+```text
+204 No Content or 200 OK
+404 Not Found if user does not exist
+```
+
+### PUT vs PATCH
+
+```text
+PUT   -> full update / replace complete resource
+PATCH -> partial update / update only selected fields
+```
+
+Interview line:
+
+```text
+If I send PUT, I should send the complete updated object. If I send PATCH, I can send only the fields that need to change.
+```
+
+### Common Status Codes
+
+```text
+200 OK
+Request successful.
+
+201 Created
+New resource created successfully.
+
+204 No Content
+Request successful but no response body.
+
+400 Bad Request
+Invalid payload, missing field, wrong data type, malformed request.
+
+401 Unauthorized
+Authentication missing or invalid. Example: token missing/expired.
+
+403 Forbidden
+User is authenticated but does not have permission.
+
+404 Not Found
+Requested resource does not exist.
+
+409 Conflict
+Duplicate or conflicting request. Example: same email already exists.
+
+500 Internal Server Error
+Server-side failure.
+```
+
+### Request Header
+
+Headers carry metadata about the request.
+
+Examples:
+
+```text
+Authorization: Bearer <token>
+Content-Type: application/json
+Accept: application/json
+```
+
+Use cases:
+
+```text
+authentication
+content type
+client information
+correlation/request ID
+cache behavior
+```
+
+### Request Body / Payload
+
+Request body contains data sent to the server, usually for `POST`, `PUT`, or `PATCH`.
+
+Example:
+
+```json
+{
+  "name": "Lokender",
+  "role": "QA"
+}
+```
+
+GET usually does not need a body.
+
+### Query Parameter vs Path Parameter
+
+Path parameter identifies a specific resource.
+
+```text
+GET /users/101
+```
+
+Here `101` is path parameter.
+
+Query parameter filters, searches, sorts, or paginates data.
+
+```text
+GET /users?role=qa&active=true&page=1
+```
+
+Here `role`, `active`, and `page` are query parameters.
+
+Interview line:
+
+```text
+Path parameter identifies the resource. Query parameter modifies or filters the request.
+```
+
+### Authentication vs Authorization
+
+Authentication answers:
+
+```text
+Who are you?
+```
+
+Example: login, token validation.
+
+Authorization answers:
+
+```text
+What are you allowed to access?
+```
+
+Example: admin can delete user, viewer cannot.
+
+### Bearer Token
+
+Bearer token is an access token sent in the `Authorization` header.
+
+```text
+Authorization: Bearer eyJhbGciOi...
+```
+
+Interview line:
+
+```text
+Bearer token is used to authenticate API requests. The server validates the token and decides whether the user can access the requested resource.
+```
+
+### API Schema Validation
+
+Schema validation means checking whether the response has expected fields and data types.
+
+Example expected schema:
+
+```text
+id      -> number
+name    -> string
+active  -> boolean
+roles   -> list
+```
+
+Python-style validation:
+
+```python
+def validate_user_schema(user):
+    assert isinstance(user["id"], int)
+    assert isinstance(user["name"], str)
+    assert isinstance(user["active"], bool)
+    assert isinstance(user["roles"], list)
+```
+
+What to validate:
+
+```text
+required fields
+data types
+nullable fields
+nested objects
+array item structure
+unexpected/missing fields
+```
+
+### Negative Scenarios For API Testing
+
+Common negative cases:
+
+```text
+missing required field
+wrong data type
+invalid enum value
+invalid path parameter
+invalid query parameter
+malformed JSON
+duplicate resource
+missing token
+expired token
+invalid token
+valid token but no permission
+accessing another user's data
+very large payload
+SQL/script injection input
+unsupported HTTP method
+rate limit scenario
+```
+
+Example:
+
+```text
+POST /users
+Body: {"name": ""}
+
+Expected:
+400 Bad Request with meaningful error message.
+```
+
+### How Do You Validate API Response?
+
+Validate:
+
+```text
+status code
+response body
+required fields
+data types
+schema
+headers
+error message
+response time
+auth/authz behavior
+database/backend state
+contract with UI
+```
+
+Strong answer:
+
+```text
+I do not validate only status code. I validate response body, schema, required fields, data types, headers, error messages, response time, authorization behavior, and sometimes database or UI consistency depending on the feature.
+```
+
+### How Do You Use API Testing In Automation Framework?
+
+Use APIs for:
+
+```text
+creating test data
+cleaning test data
+validating backend state
+reducing UI dependency
+testing business logic directly
+checking permissions
+validating dashboard/UI values
+speeding up smoke/regression suites
+```
+
+Example:
+
+```text
+1. Create customer through API.
+2. Open UI and search customer.
+3. Validate UI value.
+4. Fetch customer API again.
+5. Compare UI value with API response.
+```
+
+Interview line:
+
+```text
+In automation, I use API tests both as independent tests and as helpers for UI automation. APIs help create data, validate backend state, reduce setup time, and catch business logic issues faster than UI-only tests.
+```
+
+## 6. TypeScript And JavaScript For Playwright
 
 ### Why TypeScript?
 
@@ -711,7 +1132,7 @@ export class LoginPage {
 }
 ```
 
-## 6. Playwright Final Revision
+## 7. Playwright Final Revision
 
 ### Why Playwright?
 
@@ -791,7 +1212,7 @@ Check:
 - Parallel execution conflicts
 - Environment instability
 
-## 7. AI / GenAI / Agent Testing Cheat Sheet
+## 8. AI / GenAI / Agent Testing Cheat Sheet
 
 ### RAG vs Agentic Workflow
 
@@ -851,7 +1272,7 @@ RAGAS is used to evaluate RAG quality. Important metrics:
 - Faithfulness: claims in the answer are supported by the provided context.
 - Hallucination: answer contains unsupported or incorrect claims.
 
-## 8. Metrics And Dashboard Diagnosis
+## 9. Metrics And Dashboard Diagnosis
 
 ### Context Precision
 
@@ -965,7 +1386,7 @@ Security/safety problem.
 
 Interview line: For safety systems, recall is often more critical because false negatives mean unsafe prompts are allowed. But too many false positives hurt user experience, so thresholds need balancing.
 
-## 9. Agent Tool-Calling Metrics
+## 10. Agent Tool-Calling Metrics
 
 ### Tool Selection Accuracy
 
@@ -1017,7 +1438,7 @@ intent -> selected tool -> arguments -> execution -> final answer
 
 Final answer alone is not enough. For agents, you must validate the path also.
 
-## 10. Project Story Answers
+## 11. Project Story Answers
 
 ### Playwright Framework Ownership
 
@@ -1047,7 +1468,7 @@ I would describe Ella as an AI assistant with RAG and tool-calling/MCP-style cap
 
 This role needs strong SDET fundamentals plus AI/GenAI testing understanding. I bring Playwright, TypeScript, Python, API testing, data validation, dashboard validation, CI/CD gates, and framework design experience. I also understand agentic workflows, MCP/tool calling, LangGraph, LangSmith, RAGAS, prompt injection, hallucination checks, and AI-assisted automation.
 
-## 11. Last-Hour Rapid Recall
+## 12. Last-Hour Rapid Recall
 
 - Python: string/list/dict/set patterns, API validation utilities, OOP basics.
 - Pytest: fixture, parametrize, `pytest.raises`, markers, `conftest.py`.
